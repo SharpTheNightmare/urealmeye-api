@@ -7,7 +7,7 @@ const playerDataHeaders = [
 	"name",
 	"fame",
 	"exp",
-	"rank",
+	"stars",
 	"guild",
 	"guildRank",
 	"desc1",
@@ -94,7 +94,7 @@ async function getPlayer (playerName) {
 					let name = $(`span.entity-name`);
 					let fame = $(`.summary > tbody > tr:nth-child(4) > td .numeric`);
 					let exp = $(`.summary > tbody > tr:nth-child(5) > td .numeric`);
-					let rank = $(`.summary > tbody > tr:nth-child(6) > td div.star-container`);
+					let stars = $(`.summary > tbody > tr:nth-child(6) > td div.star-container`);
 					let guild = $(`.summary > tbody > tr:nth-child(8) > td:nth-child(2)`);
 					let guildRank = $(`.summary > tbody > tr:nth-child(9) > td:nth-child(2)`);
 					let desc1 = $(`.well.description .line1.description-line`);
@@ -105,7 +105,7 @@ async function getPlayer (playerName) {
 						{ data: name, type: cfg.PLAYER_DATA.NAME },
 						{ data: fame, type: cfg.PLAYER_DATA.FAME },
 						{ data: exp, type: cfg.PLAYER_DATA.EXP },
-						{ data: rank, type: cfg.PLAYER_DATA.RANK },
+						{ data: stars, type: cfg.PLAYER_DATA.STARS },
 						{ data: guild, type: cfg.PLAYER_DATA.GUILD },
 						{ data: guildRank, type: cfg.PLAYER_DATA.GUILDRANK },
 						{ data: desc1, type: cfg.PLAYER_DATA.DESC1 },

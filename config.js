@@ -6,7 +6,7 @@ module.exports =  {
 		NAME: "name",
 		FAME: "fame",
 		EXP: "exp",
-		RANK: "rank",
+		STARS: "stars",
 		GUILD: "guild",
 		GUILDRANK:"guildRank",
 		DESC1: "desc1",
