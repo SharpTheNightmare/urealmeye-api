@@ -40,31 +40,74 @@ const guildPlayerDataHeaders = [
 	"averageExp",
 ];
 
-function parseData (el, type, $) {
+/**
+ * @param {*} el 
+ * @param {*} type 
+ * @param {*} $ 
+ * @returns $(el).text()
+ */
+function parseWebData (el, type, $) {
 	switch (type) {
 		case cfg.PLAYER_DATA.NAME || cfg.GUILD_DATA.NAME:
 			return $(el).text().replace(/\n?\t/g, '');
 		default:
-			return $(el).text();
+			if ($(el).text().length != 0) { return $(el).text(); }
+			else { return "Private"; }
 	}
 }
 
-function parseWebData ($, info, dataHeader, results = 1) {
-	let finalinfo = [];
-	let raw_data = [[]];
+/**
+ * 
+ * @param {*} $ 
+ * @param {*} info 
+ * @param {*} dataHeader 
+ * @param {*} results 
+ * @returns `parsed_data`
+ */
+function parseData ($, info, dataHeader, results = 1) {
+	let parsed_data = [];
 	for (var i in info) {
 		info[i].data = lodash.slice(info[i].data, 0, results);
 
-		raw_data[i] = [];
+		parsed_data[i] = [];
 		$(info[i].data).each((j, el) => {
-			raw_data[i][j] = parseData(el, info[i].type, $);
+			parsed_data[i][j] = parseWebData(el, info[i].type, $);
 		});
 	}
-	
-	finalinfo = lodash.map(lodash.zip(...raw_data), Array => {
+	parsed_data = lodash.map(lodash.zip(...parsed_data), Array => {
 		return lodash.zipObject(dataHeader, Array);
 	});
-	return finalinfo;
+	return parsed_data;
+}
+
+function parseRank(playerRank)
+{
+	if (playerRank >= 0 && playerRank <= 17)
+	{
+		return "lightblue";
+	}
+	else if (playerRank >= 18 && playerRank <= 35)
+	{
+		return "blue";
+	}
+	else if (playerRank >= 36 && playerRank <= 53)
+	{
+		return "red";
+	}
+	else if (playerRank >= 54 && playerRank <= 71)
+	{
+		return "orange";
+	}
+	else if (playerRank >= 72 && playerRank <= 89)
+	{
+		return "yellow";
+	}
+	else if (playerRank == 90)
+	{
+		return "white";
+	}
+	else { return "Empty"; }
+
 }
 
 /**
@@ -113,7 +156,7 @@ async function getPlayer (playerName) {
 						{ data: desc3, type: cfg.PLAYER_DATA.DESC3 },
 					);
 
-					resolve(parseWebData($, allEls, playerDataHeaders));
+					resolve(parseData($, allEls, playerDataHeaders));
 				} else {
 					console.error(
 						reject(
@@ -174,7 +217,7 @@ async function getGuild (guildName) {
 						{ data: desc3, type: cfg.GUILD_DATA.DESC3 },
 					);
 
-					resolve(parseWebData($, allEls, guildDataHeaders));
+					resolve(parseData($, allEls, guildDataHeaders));
 				} else {
 					console.error(
 						reject(
@@ -242,7 +285,7 @@ async function getGuildPlayers (guildName, maxResults = 50) {
 						{ data: avgexp, type: cfg.GUILD_PLAYER_DATA.AVGEXP },
 					);
 
-					resolve(parseWebData($, allEls, guildPlayerDataHeaders, maxResults));
+					resolve(parseData($, allEls, guildPlayerDataHeaders, maxResults));
 				} else {
 					console.error(
 						reject(
@@ -258,6 +301,9 @@ async function getGuildPlayers (guildName, maxResults = 50) {
 }
 
 module.exports = {
+	parseWebData,
+	parseData,
+	parseRank,
     getPlayer,
     getGuild,
 	getGuildPlayers
