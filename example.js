@@ -1,9 +1,10 @@
 const scrape = require('./index');
-
-
+const prompt = require("prompt-sync")();
+//npm install prompt!!!
+const input = prompt("enter player name: ");
 // Gets player info of 'there'
 // broken for ye and dream
-scrape.getPlayer(`there`).then(stats => {
+scrape.getPlayer(input).then(stats => {
     let stars = scrape.parseRank(stats[0].stars);
     console.log(stats[0]);
     console.log(stars);
@@ -18,7 +19,7 @@ scrape.getPlayer(`there`).then(stats => {
 // });
 
 //scrape.getPlayer(`there`).then(stats => console.log(stats));
-        
+
 //scrape.getGuild(`wtf`).then(stats => console.log(stats));
 
 //scrape.getGuildPlayers(`wtf`, 3).then(stats => console.log(stats));
