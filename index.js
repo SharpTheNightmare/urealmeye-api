@@ -115,7 +115,7 @@ function parseRank(playerRank)
  */
 async function getPlayer (playerName) {
     if (typeof playerName !== 'string') {
-        throw new Error('Player name must be a string');
+        return 'Player name must be a string';
     }
     let url = cfg.PLAYER_URL + playerName;
 	console.info(`Fetching player '${playerName}' from '${url}'`);
@@ -146,7 +146,6 @@ async function getPlayer (playerName) {
 						var p_StringPull = $(`${nodelist}:nth-child(${i}) > td:nth-child(2)`);
 						var p_NumericPull = $(`${nodelist}:nth-child(${i}) > td .numeric`);
 						var stars = $(`${nodelist}:nth-child(${i}) > td div.star-container`);
-						
 						if (p_StringCheck === "Fame") {
 							allEls.push({data: p_NumericPull, type: cfg.PLAYER_DATA.FAME});
 						} else if (p_StringCheck === "Exp") {
@@ -169,9 +168,7 @@ async function getPlayer (playerName) {
 				} else {
 					console.error(
 						reject(
-							new Error(
-								"Could not get player due to an error" + err
-							)
+							"Could not get player due to an error" + err
 						)
 					);
 				}
@@ -185,7 +182,7 @@ async function getPlayer (playerName) {
  */
 async function getGuild (guildName) {
     if (typeof guildName !== 'string') {
-        throw new Error('Guild name must be a string');
+        return 'Guild name must be a string';
     }
     let url = cfg.GUILD_URL + guildName;
 	console.info(`Fetching '${guildName}' stats from '${url}'`);
@@ -230,9 +227,7 @@ async function getGuild (guildName) {
 				} else {
 					console.error(
 						reject(
-							new Error(
-								"Could not get guild due to an error" + err
-							)
+							"Could not get guild due to an error" + err
 						)
 					);
 				}
@@ -247,7 +242,7 @@ async function getGuild (guildName) {
  */
 async function getGuildPlayers (guildName, maxResults = 50) {
     if (typeof guildName !== 'string') {
-        throw new Error('Guild name must be a string');
+        return 'Guild name must be a string';
     }
     if (maxResults > 50) {
 		console.log(`Max results is 50.`);
@@ -297,9 +292,7 @@ async function getGuildPlayers (guildName, maxResults = 50) {
 				} else {
 					console.error(
 						reject(
-							new Error(
-								"Could not get players due to an error" + err
-							)
+							"Could not get players due to an error" + err
 						)
 					);
 				}
