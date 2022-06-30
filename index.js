@@ -3,43 +3,6 @@ const cheerio = require('cheerio');
 const lodash = require('lodash');
 const cfg = require('./config.js');
 
-var playerDataHeaders = [
-	"name",
-	"fame",
-	"exp",
-	"stars",
-	"guild",
-	"guildRank",
-	"desc1",
-	"desc2",
-	"desc3",
-];
-
-const guildDataHeaders = [
-	"name",
-	"members",
-	"characters",
-	"rank",
-	"fame",
-	"exp",
-	"desc1",
-	"desc2",
-	"desc3",
-];
-
-const guildPlayerDataHeaders = [
-	"name",
-	"stars",
-	"guildRank",
-	"fame",
-	"experience",
-	"characters",
-	"lastseen",
-	"servers",
-	"averageFame",
-	"averageExp",
-];
-
 /**
  * @param {*} el
  * @param {*} type
@@ -47,27 +10,26 @@ const guildPlayerDataHeaders = [
  * @returns $(el).text()
  */
 function parseWebData (el, type, $) {
-	switch (type) {
-		case cfg.PLAYER_DATA.NAME || cfg.GUILD_DATA.NAME:
-			return $(el).text().replace(/\n?\t/g, '');
-		default:
-			return $(el).text();
-	}
+	if (type == cfg.PLAYER_DATA.NAME || type == cfg.GUILD_DATA.NAME) {
+		return $(el).text().replace(/\n?\t/g, '');
+	} else if ($(el) == undefined) {
+		return "None";
+	} else { return $(el).text(); }
 }
 
 /**
  *
  * @param {*} $
  * @param {*} info
- * @param {*} dataHeader
  * @param {*} results
  * @returns `parsed_data`
  */
-function parseData ($, info, dataHeader, results = 1) {
+function parseData ($, info, results = 1) {
 	let parsed_data = [];
+	let dataHeader = [];
 	for (var i in info) {
 		info[i].data = lodash.slice(info[i].data, 0, results);
-
+		dataHeader[i] = info[i].type;
 		parsed_data[i] = [];
 		$(info[i].data).each((j, el) => {
 			parsed_data[i][j] = parseWebData(el, info[i].type, $);
@@ -164,7 +126,7 @@ async function getPlayer (playerName) {
 						{data: desc3, type: cfg.PLAYER_DATA.DESC3},
 					);
 
-					resolve(parseData($, allEls, playerDataHeaders));
+					resolve(parseData($, allEls));
 				} else {
 					console.error(
 						reject(
@@ -223,7 +185,7 @@ async function getGuild (guildName) {
 						{ data: desc3, type: cfg.GUILD_DATA.DESC3 },
 					);
 
-					resolve(parseData($, allEls, guildDataHeaders));
+					resolve(parseData($, allEls));
 				} else {
 					console.error(
 						reject(
@@ -288,7 +250,7 @@ async function getGuildPlayers (guildName, maxResults = 50) {
 						{ data: avgexp, type: cfg.GUILD_PLAYER_DATA.AVGEXP },
 					);
 
-					resolve(parseData($, allEls, guildPlayerDataHeaders, maxResults));
+					resolve(parseData($, allEls, maxResults));
 				} else {
 					console.error(
 						reject(
