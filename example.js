@@ -1,12 +1,12 @@
 const scrape = require('./index');
 
-scrape.getPlayer("there").then(async stats => {
+scrape.getPlayer("Ina").then(async stats => {
     let gfame = await scrape.getGuild(stats[0].guild).then(getFame => getFame[0].fame);
 
     let finalFame = (stats[0].fame / gfame) * 100;
     console.log(stats[0].fame);
     console.log(gfame);
-    console.log(`${Math.round((finalFame + Number.EPSILON) * 100) / 100}%`);
+    console.log(`${finalFame.toFixed(2)}%`);
 });
 
 // Gets only the name of the players in the guild
@@ -24,7 +24,7 @@ scrape.getPlayer("there").then(async stats => {
 //     let finalFame = (mostFame / gfame) * 100;
 //     console.log(mostFame);
 //     console.log(gfame);
-//     console.log(`${Math.round((finalFame + Number.EPSILON) * 100) / 100}%`);
+//     console.log(`${finalFame.toFixed(2)}%`);
 // });
 
 //scrape.getPlayer(`there`).then(stats => console.log(stats));
