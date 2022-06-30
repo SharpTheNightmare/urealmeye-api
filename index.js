@@ -3,7 +3,7 @@ const cheerio = require('cheerio');
 const lodash = require('lodash');
 const cfg = require('./config.js');
 
-const playerDataHeaders = [
+var playerDataHeaders = [
 	"name",
 	"fame",
 	"exp",
@@ -79,32 +79,33 @@ function parseData ($, info, dataHeader, results = 1) {
 	return parsed_data;
 }
 
+/**
+ * @param {*} playerRank
+ * @returns Stringed star name
+ */
 function parseRank(playerRank)
 {
 	if (playerRank >= 0 && playerRank <= 17)
 	{
-		return "lightblue";
+		return "Light blue";
 	}
 	else if (playerRank >= 18 && playerRank <= 35)
 	{
-		return "blue";
+		return "Dark blue";
 	}
 	else if (playerRank >= 36 && playerRank <= 53)
 	{
-		return "red";
+		return "Red";
 	}
 	else if (playerRank >= 54 && playerRank <= 71)
 	{
-		return "orange";
+		return "Orange";
 	}
 	else if (playerRank >= 72 && playerRank <= 89)
 	{
-		return "yellow";
+		return "Yellow";
 	}
-	else if (playerRank == 90)
-	{
-		return "white";
-	}
+	else if (playerRank == 90) { return "White"; }
 	else { return "Empty"; }
 
 }
@@ -128,79 +129,41 @@ async function getPlayer (playerName) {
 			},
 			(err, res, body) => {
 				if (!err && res.statusCode == 200) {
-					console.info("Successfully loaded player page");
 					var $ = cheerio.load(body);
-
+					console.info("Successfully loaded player page");
 					let allEls = [];
+
 					let name = $(`span.entity-name`);
+					allEls.push({data: name, type: cfg.PLAYER_DATA.NAME});
+
 					let desc1 = $(`.well.description .line1.description-line`);
 					let desc2 = $(`.well.description .line2.description-line`);
 					let desc3 = $(`.well.description .line3.description-line`);
-					let firstCheck = $(`.summary > tbody > tr:nth-child(1) > td:nth-child(1)`).text().replace(/\n?\t/g, '');
-					let guildtrans = $(`.summary > tbody > tr:nth-child(9) > td:nth-child(2)`).text().replace(/\n?\t/g, '');
-					let locTrans = $(`.summary > tbody > tr:nth-child(8) > td:nth-child(1)`).text().replace(/\n?\t/g, '');
-					let skinsTrans = $(`.summary > tbody > tr:nth-child(2) > td:nth-child(1)`).text().replace(/\n?\t/g, '');
-					// checks if hidden, then pushes if hidden
-					if (guildtrans === 'hidden') {
-						allEls.push(
-							{ data: name, type: cfg.PLAYER_DATA.NAME },
-							{ data: $(`.summary > tbody > tr:nth-child(2) > td .numeric`), type: cfg.PLAYER_DATA.FAME },
-							{ data: $(`.summary > tbody > tr:nth-child(3) > td .numeric`), type: cfg.PLAYER_DATA.EXP },
-							{ data: $(`.summary > tbody > tr:nth-child(4) > td div.star-container`), type: cfg.PLAYER_DATA.STARS },
-							{ data: $(`.summary > tbody > tr:nth-child(6) > td:nth-child(2)`), type: cfg.PLAYER_DATA.GUILD },
-							{ data: $(`.summary > tbody > tr:nth-child(7) > td:nth-child(2)`), type: cfg.PLAYER_DATA.GUILDRANK },
-						);
-						// pushes if not hidden
-					} else if (locTrans === 'Created' || locTrans === 'First seen') {
-						allEls.push(
-							{ data: name, type: cfg.PLAYER_DATA.NAME },
-							{ data: $(`.summary > tbody > tr:nth-child(4) > td .numeric`), type: cfg.PLAYER_DATA.FAME },
-							{ data: $(`.summary > tbody > tr:nth-child(5) > td .numeric`), type: cfg.PLAYER_DATA.EXP },
-							{ data: $(`.summary > tbody > tr:nth-child(6) > td div.star-container`), type: cfg.PLAYER_DATA.STARS },
-							{ data: $(`.summary`).text("None"), type: cfg.PLAYER_DATA.GUILD },
-							{ data: $(`.summary`).text("None"), type: cfg.PLAYER_DATA.GUILDRANK },
-						);
-					} else if (skinsTrans === 'Exaltations') {
-						allEls.push(
-							{ data: name, type: cfg.PLAYER_DATA.NAME },
-							{ data: $(`.summary > tbody > tr:nth-child(3) > td .numeric`), type: cfg.PLAYER_DATA.FAME },
-							{ data: $(`.summary > tbody > tr:nth-child(4) > td .numeric`), type: cfg.PLAYER_DATA.EXP },
-							{ data: $(`.summary > tbody > tr:nth-child(5) > td div.star-container`), type: cfg.PLAYER_DATA.STARS },
-							{ data: $(`.summary > tbody > tr:nth-child(7) > td:nth-child(2)`), type: cfg.PLAYER_DATA.GUILD },
-							{ data: $(`.summary > tbody > tr:nth-child(8) > td:nth-child(2)`), type: cfg.PLAYER_DATA.GUILDRANK },
-						);
-					} else {
-						allEls.push(
-							{ data: name, type: cfg.PLAYER_DATA.NAME },
-							{ data: $(`.summary > tbody > tr:nth-child(4) > td .numeric`), type: cfg.PLAYER_DATA.FAME },
-							{ data: $(`.summary > tbody > tr:nth-child(5) > td .numeric`), type: cfg.PLAYER_DATA.EXP },
-							{ data: $(`.summary > tbody > tr:nth-child(6) > td div.star-container`), type: cfg.PLAYER_DATA.STARS },
-							{ data: $(`.summary > tbody > tr:nth-child(8) > td:nth-child(2)`), type: cfg.PLAYER_DATA.GUILD },
-							{ data: $(`.summary > tbody > tr:nth-child(9) > td:nth-child(2)`), type: cfg.PLAYER_DATA.GUILDRANK },
-						);
+
+					var nodelist = "table.summary > tbody > tr";
+					for (let i = 1; i < $(nodelist).toArray().length; i++) {
+						var p_StringCheck = $(`${nodelist}:nth-child(${i}) > td:nth-child(1)`).text();
+						var p_StringPull = $(`${nodelist}:nth-child(${i}) > td:nth-child(2)`);
+						var p_NumericPull = $(`${nodelist}:nth-child(${i}) > td .numeric`);
+						var stars = $(`${nodelist}:nth-child(${i}) > td div.star-container`);
+						
+						if (p_StringCheck === "Fame") {
+							allEls.push({data: p_NumericPull, type: cfg.PLAYER_DATA.FAME});
+						} else if (p_StringCheck === "Exp") {
+							allEls.push({data: p_NumericPull, type: cfg.PLAYER_DATA.EXP});
+						} else if (p_StringCheck === "Rank") {
+							allEls.push({data: stars, type: cfg.PLAYER_DATA.STARS});
+						} else if (p_StringCheck === "Guild") {
+							allEls.push({data: p_StringPull, type: cfg.PLAYER_DATA.GUILD});
+						} else if (p_StringCheck === "Guild Rank") {
+							allEls.push({data: p_StringPull, type: cfg.PLAYER_DATA.GUILDRANK});
+						}
 					}
-					// console.log(desc1);
-					//NOT WORKING VREY BROKEN
-					// desctrans=$(desc1).text().replace(/\n?\t/g, '');
-					// console.log(desctrans)
-					// if (typeof desctrans === '') {
-					// 	let desc15="No description!"
-					// 	delete desc1;
-					// }	else {
-					// 	allEls.push(
-					// 		{ data: desc1, type: cfg.PLAYER_DATA.DESC1 },
-					// 	);
-					// }
-					// allEls.push(
-					// 	{ data: name, type: cfg.PLAYER_DATA.NAME },
-					// 	{ data: fame, type: cfg.PLAYER_DATA.FAME },
-					// 	{ data: exp, type: cfg.PLAYER_DATA.EXP },
-					// 	{ data: stars, type: cfg.PLAYER_DATA.STARS },
-					// 	{ data: guild, type: cfg.PLAYER_DATA.GUILD },
-					// 	{ data: guildRank, type: cfg.PLAYER_DATA.GUILDRANK },
-					// 	{ data: desc1, type: cfg.PLAYER_DATA.DESC1 },
-					// 	{ data: desc2, type: cfg.PLAYER_DATA.DESC2 },
-					// 	{ data: desc3, type: cfg.PLAYER_DATA.DESC3 },
+					allEls.push(
+						{data: desc1, type: cfg.PLAYER_DATA.DESC1},
+						{data: desc2, type: cfg.PLAYER_DATA.DESC2},
+						{data: desc3, type: cfg.PLAYER_DATA.DESC3},
+					);
 
 					resolve(parseData($, allEls, playerDataHeaders));
 				} else {
@@ -238,8 +201,8 @@ async function getGuild (guildName) {
 				if (!err && res.statusCode == 200) {
 					var $ = cheerio.load(body);
 					console.info("Successfully loaded guild page");
-
 					let allEls = [];
+
 
 					let name = $(`span.entity-name`);
 					let members = $(`.summary > tbody > tr:nth-child(1) > td:nth-child(2)`);
@@ -304,7 +267,6 @@ async function getGuildPlayers (guildName, maxResults = 50) {
 				if (!err && res.statusCode == 200) {
 					var $ = cheerio.load(body);
 					console.info("Successfully loaded guild players");
-
 					let allEls = [];
 
 					let names = $(".table-responsive > table > tbody > tr > td:nth-child(1)");

@@ -21,7 +21,6 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.11",
     "lodash": "^4.17.21",
-    "prompt-sync": "^4.2.0",
     "request": "^2.88.2"
   }
 }
